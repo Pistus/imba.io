@@ -27,51 +27,43 @@ tag app-menu-item
 	# children's natural height is calculated
 	# and stored upon mount so that it can be animated to
 	# could height change after mount?
-	###
-	childrenHeightValue = 0
+	childrenHeight = 0
 	def mount
-		if $children
-			const oldHeightStyle = $children.style.height
-			$children.style.height = 'auto'
-			childrenHeightValue = $children.offsetHeight
-			$children.style.height = oldHeightStyle
-	
-	get childrenHeight
-		if active?
-			if childrenHeightValue == null
-				'auto'
-			else
-				childrenHeightValue
-		else
-			0
-	
-	def handleExpandSection
-		childrenHeightValue = null
-	###
+		const oldHeightStyle = $children.style.height
+		$children.style.height = 'auto'
+		childrenHeight = $children.offsetHeight
+		$children.style.height = oldHeightStyle
 
 	css
-		.item c:gray6 fw:normal pos:relative d:block
-		.item	.item-title
-			py:2px of:hidden text-overflow:ellipsis ws:nowrap
+		.item
+			c:gray6 fw:normal pos:relative d:block
+			&.active
+				fw:500 c:gray9
+
+		.item-title
+			py:2px 
 			@hover c:gray9
-		item.active fw:500 c:gray9
-		.triangle c:gray5 pos:absolute t:calc(50% - 3px) l:-10px tween:transform 150ms ease-in-out
-		.active .triangle rotate:90deg
-		.children pl:15px of:hidden tween:height 200ms ease-out
-		&.wip .item-title @after
-			pos:relative d:inline ai:center bg:yellow3 content:'wip' rd:sm
-			c:yellow7 fs:xxs/12px tt:uppercase px:1 py:0.5 rd:1 ml:1 va:middle fw:bold
-	
+		
+		.triangle
+			c:gray5 pos:absolute t:calc(50% - 3px) l:-10px tween:transform 150ms ease-in-out
+
+		.active .triangle
+			rotate:90deg
+		
+
+
+		.children
+			pl:15px of:hidden tween:height 200ms ease-out
 
 	def render
-		<self .{data.flagstr}>
+		<self>
 
-			<a$item.item route-to=data.href>
+			<a$item.item route-to=data.href @click=(console.log(data))>
 				<div.triangle innerHTML=triangleSVG> if hasChildren?
 				<div.item-title> data.title
 
 			if renderChildren?
-				<div$children.children [h:{active? ? 'auto' : 0}px]>
+				<div$children.children [h:{active? ? childrenHeight : 0}px]>
 					for child in data.children
 						continue if child.level >= levelCutoff
 						<app-menu-item.child data=child>
